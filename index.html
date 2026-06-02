@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Meri Jaan!</title>
+    <!-- Tailwind CSS v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .font-handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Heart Particle Animation Setup */
+        .heart-particle {
+            position: fixed;
+            bottom: -50px;
+            pointer-events: none;
+            animation: floatUp linear forwards;
+            z-index: 30;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.6;
+            }
+
+            90% {
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: translateY(-105vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Vinyl Spin Animation */
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinning {
+            animation: spin 4s linear infinite;
+        }
+
+        /* Smooth Reveal on Scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.215, 0.610, 0.355, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="bg-[#FFF5F5] text-[#2D2325] overflow-x-hidden">
+
+    <!-- Container for dynamic floating hearts background -->
+    <div id="heart-container" class="fixed inset-0 pointer-events-none z-30"></div>
+
+    <!-- BACKGROUND AUDIO FILE (Change your-song.mp3 here) -->
+    <audio id="bg-music" loop src="your-song.mp3"></audio>
+
+    <!-- SPINNING VINYL MUSIC PLAYER CONTROLLER -->
+    <button id="music-toggle"
+        class="fixed top-6 right-6 z-50 bg-[#4A0E17] text-[#FFD700] p-3 rounded-full shadow-2xl border-2 border-[#FFD700] cursor-pointer hover:scale-110 transition duration-300 flex items-center justify-center">
+        <div id="vinyl-icon"
+            class="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center border border-dashed border-[#FFD700]">
+            <!-- Center disc hole -->
+            <div class="w-2 h-2 rounded-full bg-[#FFD700]"></div>
+        </div>
+    </button>
+
+    <!-- COUNTDOWN OVERLAY SCREEN -->
+    <div id="countdown-overlay"
+        class="fixed inset-0 bg-gradient-to-tr from-[#310A0D] via-[#6B111C] to-[#4A0E17] z-50 flex flex-col justify-center items-center text-center px-4 text-white">
+        <h2 class="text-3xl md:text-5xl font-serif font-bold tracking-wide mb-3 text-[#FFF5F5]">Sabr Ka Phal Meetha Hota
+            Hai... 😉</h2>
+        <p class="text-lg md:text-xl font-light italic text-[#FFC0CB] mb-10 max-w-md">Counting down every heartbeat
+            until your special day!</p>
+
+        <!-- Premium Glassmorphism Timer Grid -->
+        <div class="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto mb-12">
+            <div
+                class="bg-white/10 backdrop-blur-lg border border-white/20 p-4 md:p-6 rounded-2xl shadow-xl min-w-[75px] md:min-w-[120px]">
+                <span id="days" class="text-3xl md:text-5xl font-serif font-bold block text-[#FFD700]">00</span>
+                <span
+                    class="text-[10px] md:text-xs uppercase tracking-widest text-[#FFF5F5]/70 font-semibold block mt-1">Days</span>
+            </div>
+            <div
+                class="bg-white/10 backdrop-blur-lg border border-white/20 p-4 md:p-6 rounded-2xl shadow-xl min-w-[75px] md:min-w-[120px]">
+                <span id="hours" class="text-3xl md:text-5xl font-serif font-bold block text-[#FFD700]">00</span>
+                <span
+                    class="text-[10px] md:text-xs uppercase tracking-widest text-[#FFF5F5]/70 font-semibold block mt-1">Hours</span>
+            </div>
+            <div
+                class="bg-white/10 backdrop-blur-lg border border-white/20 p-4 md:p-6 rounded-2xl shadow-xl min-w-[75px] md:min-w-[120px]">
+                <span id="minutes" class="text-3xl md:text-5xl font-serif font-bold block text-[#FFD700]">00</span>
+                <span
+                    class="text-[10px] md:text-xs uppercase tracking-widest text-[#FFF5F5]/70 font-semibold block mt-1">Mins</span>
+            </div>
+            <div
+                class="bg-white/10 backdrop-blur-lg border border-white/20 p-4 md:p-6 rounded-2xl shadow-xl min-w-[75px] md:min-w-[120px]">
+                <span id="seconds" class="text-3xl md:text-5xl font-serif font-bold block text-[#FFD700]">00</span>
+                <span
+                    class="text-[10px] md:text-xs uppercase tracking-widest text-[#FFF5F5]/70 font-semibold block mt-1">Secs</span>
+            </div>
+        </div>
+
+        <!-- Hidden Enter Button (Revealed dynamically when countdown ends) -->
+        <button id="enter-btn"
+            class="hidden px-8 py-4 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-[#4A0E17] font-bold text-lg rounded-full shadow-[0_0_20px_rgba(255,215,0,0.4)] hover:brightness-110 transition duration-300 transform hover:scale-105 cursor-pointer">
+            Click Here, Birthday Girl! 🎉
+        </button>
+    </div>
+
+
+    <!-- MAIN SITE EXPERTLY REVEALED -->
+    <div id="main-content" class="hidden relative z-20">
+
+        <!-- HERO AREA -->
+        <section
+            class="min-h-screen flex flex-col justify-center items-center text-center p-6 relative bg-gradient-to-b from-[#FFE4E6] to-[#FFF5F5]">
+            <span
+                class="text-xs md:text-sm uppercase tracking-widest font-semibold text-[#6B111C] mb-3 bg-white/60 backdrop-blur px-4 py-1.5 rounded-full border border-[#6B111C]/10">To
+                My Soulmate</span>
+            <h1 class="text-5xl md:text-8xl font-serif text-[#6B111C] font-black tracking-tight mb-6">
+                Happy Birthday, <br class="md:hidden">Meri Jaan! 🎂
+            </h1>
+            <!-- Dynamic Typing Anchor Container -->
+            <div class="min-h-[40px] flex items-center justify-center">
+                <p id="typewriter-text"
+                    class="text-xl md:text-3xl font-handwritten text-[#A3485E] max-w-2xl px-4 border-r-2 border-[#A3485E] animate-pulse">
+                </p>
+            </div>
+            <a href="#photo-gallery"
+                class="mt-12 px-6 py-3 bg-[#6B111C] text-white font-medium tracking-wide rounded-full shadow-xl hover:bg-[#4A0E17] transition transform hover:-translate-y-1 duration-300">
+                Hamari Yaadein Dekho 👇
+            </a>
+        </section>
+
+        <!-- PHOTO GALLERY (POLAROID DIARY SECTION) -->
+        <section id="photo-gallery" class="py-24 px-4 max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-20 reveal">
+                <h2 class="text-4xl md:text-6xl font-serif text-[#6B111C] font-bold mb-4">Har Ek Photo, Ek Haseen Yaad ✨
+                </h2>
+                <div class="w-16 h-1 bg-[#6B111C]/20 mx-auto rounded-full"></div>
+            </div>
+
+            <!-- Polaroid Flex-Grid Interaction Base -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-x-12 md:gap-y-24 items-center px-4">
+
+                <!-- Polaroid Photo 1 -->
+                <div
+                    class="reveal bg-white p-5 pb-8 rounded-sm shadow-[0_15px_35px_rgba(0,0,0,0.08)] border border-gray-100 transform -rotate-2 hover:rotate-0 hover:scale-105 transition duration-500 group">
+                    <div class="overflow-hidden bg-gray-50 rounded-xs mb-6">
+                        <img src="img1.jpg" alt="Your Beautiful Wife"
+                            class="w-full h-[350px] object-cover group-hover:scale-105 transition duration-700">
+                    </div>
+                    <p class="text-2xl md:text-3xl font-handwritten text-[#4A0E17] text-center mt-2">
+                        "Tumhari har ek ada par dil fida hai."
+                    </p>
+                </div>
+
+                <!-- Polaroid Photo 2 -->
+                <div
+                    class="reveal bg-white p-5 pb-8 rounded-sm shadow-[0_15px_35px_rgba(0,0,0,0.08)] border border-gray-100 transform rotate-3 hover:rotate-0 hover:scale-105 transition duration-500 md:translate-y-16 group">
+                    <div class="overflow-hidden bg-gray-50 rounded-xs mb-6">
+                        <img src="img2.jpg" alt="Cherished Moment Together"
+                            class="w-full h-[350px] object-cover group-hover:scale-105 transition duration-700">
+                    </div>
+                    <p class="text-2xl md:text-3xl font-handwritten text-[#4A0E17] text-center mt-2">
+                        "Log kehte hain pyaar ek baar hota hai, par mujhe toh tumse har roz hota hai."
+                    </p>
+                </div>
+
+                <!-- Polaroid Photo 3 -->
+                <div
+                    class="reveal bg-white p-5 pb-8 rounded-sm shadow-[0_15px_35px_rgba(0,0,0,0.08)] border border-gray-100 transform -rotate-1 hover:rotate-0 hover:scale-105 transition duration-500 group">
+                    <div class="overflow-hidden bg-gray-50 rounded-xs mb-6">
+                        <img src="img3.jpg" alt="Stunning Capture"
+                            class="w-full h-[350px] object-cover group-hover:scale-105 transition duration-700">
+                    </div>
+                    <p class="text-2xl md:text-3xl font-handwritten text-[#4A0E17] text-center mt-2">
+                        "Meri bikhri hui life ko handle karne ke liye... Thank you so much."
+                    </p>
+                </div>
+
+                <!-- Polaroid Photo 4 -->
+                <div
+                    class="reveal bg-white p-5 pb-8 rounded-sm shadow-[0_15px_35px_rgba(0,0,0,0.08)] border border-gray-100 transform rotate-1 hover:rotate-0 hover:scale-105 transition duration-500 md:translate-y-16 group">
+                    <div class="overflow-hidden bg-gray-50 rounded-xs mb-6">
+                        <img src="img4.jpg" alt="Always & Forever"
+                            class="w-full h-[350px] object-cover group-hover:scale-105 transition duration-700">
+                    </div>
+                    <p class="text-2xl md:text-3xl font-handwritten text-[#4A0E17] text-center mt-2">
+                        "Nazar na lage humari khushiyo ko... You look beautiful, always!"
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================= -->
+        <!-- DAUGHTER'S SPECIAL DEDICATION SECTION (NEW) -->
+        <!-- ========================================= -->
+        <section id="pari-section"
+            class="py-24 bg-gradient-to-b from-[#FFF5F5] to-[#FFE4E6] border-y border-[#FFE4E6]/50 px-4">
+            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-16 reveal">
+
+                <!-- Left Side: Glowing circular photo with pulsing animation -->
+                <div class="flex-shrink-0 relative">
+                    <!-- The Halo/Glow Effect -->
+                    <div class="absolute inset-0 rounded-full bg-[#FFD700] opacity-40 blur-2xl animate-pulse"></div>
+
+                    <!-- The Locket Frame -->
+                    <div
+                        class="relative w-64 h-64 md:w-80 md:h-80 rounded-full border-8 border-white shadow-[0_20px_50px_rgba(74,14,23,0.15)] overflow-hidden">
+                        <!-- REPLACE WITH YOUR DAUGHTER'S IMAGE (daughter.jpg) -->
+                        <img src="daughter.jpg" alt="Our Beautiful Daughter" class="w-full h-full object-cover">
+                    </div>
+
+                    <!-- Small Sparkle Icon -->
+                    <div class="absolute -top-4 -right-4 text-3xl animate-bounce">✨</div>
+                </div>
+
+                <!-- Right Side: The Message -->
+                <div class="flex-grow text-center md:text-left space-y-6">
+                    <span class="font-handwritten text-4xl text-[#6B111C] font-bold block">Humari Nanny Pari...
+                        ❤️</span>
+
+                    <p class="text-2xl md:text-3xl font-light italic leading-relaxed text-[#4A0E17]">
+                        <!-- YOU CAN EDIT THIS MESSAGE -->
+                        "Humare pyaar ka sabse haseen tohfa, humari thodi si crazy family ki real star!"
+                    </p>
+
+                    <div class="pt-4 flex justify-center md:justify-start items-center gap-2">
+                        <div class="w-12 h-0.5 bg-[#FFD700]/50 rounded-full"></div>
+                        <p class="text-sm uppercase tracking-widest font-semibold text-[#A3485E]">Ayzal
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXTRA EMOTIONAL INSIGHTS TEXT HIGHLIGHTS -->
+        <section class="py-20 bg-[#FFE4E6]/50 border-y border-[#FFE4E6] px-4 text-center">
+            <div class="max-w-4xl mx-auto reveal">
+                <p class="text-xl md:text-2xl font-serif text-[#6B111C] italic font-medium leading-relaxed">
+                    "Gussa karti ho toh bhi pyaari lagti ho, ab batao kya karu? <br class="hidden md:inline"> Tumhaare
+                    bina mera sab kuch adhoora lagta hai."
+                </p>
+            </div>
+        </section>
+
+        <!-- INTENSE PARCHMENT PAPER LOVE LETTER -->
+        <section class="py-32 px-4 max-w-4xl mx-auto">
+            <div
+                class="reveal bg-[#FFFDF9] border border-[#F1E5D1] shadow-2xl rounded-3xl p-8 md:p-16 relative overflow-hidden">
+                <!-- Visual absolute wax stamp accent for structural aesthetic beauty -->
+                <div class="absolute top-6 right-6 text-red-700 opacity-20 text-6xl select-none font-handwritten">❤️
+                </div>
+
+                <h3 class="text-3xl font-serif font-bold text-[#4A0E17] mb-8 border-b border-[#F1E5D1] pb-4">Mera Chota
+                    Sa Message...</h3>
+                <div class="space-y-6 text-lg text-[#3D3335] leading-relaxed font-light">
+                    <p>"Zindagi bohot haseen hai, par sirf tumhaare sath. Tumne meri life me aakar sab kuch badal diya
+                        hai."</p>
+                    <p>"Waqt badal sakta hai, halaat badal sakte hain, par tumhaare liye mera pyaar kabhi nahi badlega.
+                        Tum kal bhi meri queen thi, aaj bhi ho, aur hamesha rahogi."</p>
+                    <p class="pt-6 font-handwritten text-3xl text-[#6B111C] font-bold">Happy Birthday once again to the
+                        queen of my heart! Always yours.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER ARCHITECTURE -->
+        <footer
+            class="py-12 border-t border-gray-100 bg-white text-center text-xs tracking-widest uppercase font-semibold text-[#A3485E]">
+            Handcrafted with Total Devotion & Love by Your Husband
+        </footer>
+    </div>
+
+
+    <!-- JAVASCRIPT MASTER IMPLEMENTATION ENGINE -->
+    <!-- JAVASCRIPT MASTER IMPLEMENTATION ENGINE -->
+    <script>
+        // ==========================================
+        // 1. ALL VARIABLES INITIALIZED FIRST (Fixes ReferenceError)
+        // ==========================================
+        const targetDate = new Date("September 9, 2026 00:00:00").getTime();
+        const introPhrase = "Happy Birthday to the person jo meri poori duniya hai... ❤️";
+
+        let charIndex = 0;
+        let audioRunning = false;
+
+        const countdownOverlay = document.getElementById("countdown-overlay");
+        const mainContent = document.getElementById("main-content");
+        const enterBtn = document.getElementById("enter-btn");
+        const music = document.getElementById("bg-music");
+        const musicToggle = document.getElementById("music-toggle");
+        const vinylIcon = document.getElementById("vinyl-icon");
+        const typewriterEl = document.getElementById("typewriter-text");
+        const heartContainer = document.getElementById("heart-container");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPreview = urlParams.get('preview') === 'true';
+
+        // ==========================================
+        // 2. CORE FUNCTIONS
+        // ==========================================
+        function revealMainExperience() {
+            countdownOverlay.style.display = "none";
+            mainContent.classList.remove("hidden");
+            initializeScrollReveal();
+            startFloatingHearts();
+            startTypewriterEffect();
+        }
+
+        function handleAudioPlayback(forcePlay = false) {
+            if (!audioRunning || forcePlay) {
+                music.play().then(() => {
+                    audioRunning = true;
+                    vinylIcon.classList.add('spinning');
+                }).catch(e => console.log("Audio waiting for explicit user interaction.", e));
+            } else {
+                music.pause();
+                audioRunning = false;
+                vinylIcon.classList.remove('spinning');
+            }
+        }
+
+        // ==========================================
+        // 3. RUNTIME EXECUTION
+        // ==========================================
+        if (isPreview) {
+            revealMainExperience();
+
+            // Fixes Browser Music Block: Plays music on your very first click anywhere on the page
+            const playOnFirstInteraction = () => {
+                handleAudioPlayback(true);
+                document.removeEventListener('click', playOnFirstInteraction);
+            };
+            document.addEventListener('click', playOnFirstInteraction);
+        } else {
+            const timerEngine = setInterval(() => {
+                const now = new Date().getTime();
+                const diff = targetDate - now;
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById("days").innerText = d < 10 ? "0" + d : d;
+                document.getElementById("hours").innerText = h < 10 ? "0" + h : h;
+                document.getElementById("minutes").innerText = m < 10 ? "0" + m : m;
+                document.getElementById("seconds").innerText = s < 10 ? "0" + s : s;
+
+                if (diff <= 0) {
+                    clearInterval(timerEngine);
+                    document.querySelector('.grid').style.display = "none";
+                    document.querySelector('#countdown-overlay p').innerText = "Vaqt aa gaya hai! Open your gift below. ❤️";
+                    enterBtn.classList.remove("hidden");
+                }
+            }, 1000);
+        }
+
+        // Click handler for the real birthday landing page button
+        enterBtn.addEventListener("click", () => {
+            revealMainExperience();
+            handleAudioPlayback(true);
+        });
+
+        // Click handler for the floating vinyl button
+        musicToggle.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevents conflict with global click handler
+            handleAudioPlayback();
+        });
+
+        // Creative Typewriter Animation Vector Engine
+        function startTypewriterEffect() {
+            if (charIndex < introPhrase.length) {
+                typewriterEl.textContent += introPhrase.charAt(charIndex);
+                charIndex++;
+                setTimeout(startTypewriterEffect, 75);
+            } else {
+                typewriterEl.style.borderRight = "none";
+            }
+        }
+
+        // Scroll Reveal Interaction Layer
+        function initializeScrollReveal() {
+            const runCheck = () => {
+                const triggerPoint = (window.innerHeight / 5) * 4;
+                document.querySelectorAll('.reveal').forEach(item => {
+                    const topPos = item.getBoundingClientRect().top;
+                    if (topPos < triggerPoint) {
+                        item.classList.add('active');
+                    }
+                });
+            };
+            window.addEventListener('scroll', runCheck);
+            runCheck();
+        }
+
+        // Beautiful Floating Hearts Particle Engine
+        function startFloatingHearts() {
+            const heartIcons = ['❤️', '💖', '💝', '💕'];
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-particle');
+                heart.innerHTML = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                heart.style.fontSize = (Math.random() * 16 + 12) + 'px';
+
+                heartContainer.appendChild(heart);
+                setTimeout(() => heart.remove(), 7000);
+            }, 450);
+        }
+    </script>
+</body>
+
+</html>
