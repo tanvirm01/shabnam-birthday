@@ -94,7 +94,7 @@ The website is optimized for:
 Add your deployed URL here:
 
 ```text
-https://your-demo-url.com
+https://tanvirm01.github.io/shabnam-birthday/
 ```
 
 ## 📸 Screenshots
